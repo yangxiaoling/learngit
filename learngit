@@ -1,0 +1,1081 @@
+https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000
+
+windows上的git, (git bash)
+
+$ git config --global user.name "Your Name"  # --global表示当前机器上的所有git仓库都会使用这个配置
+$ git config --global user.email "email@example.com"
+
+
+创建本地版本库,
+$ mkdir learngit
+$ cd learngit/
+$ git init
+
+把文件添加到版本库,(可一次commit多个add)
+$ git add readme.txt
+$ git commit -m 'wrote a readme file'
+[master （根提交） 2243fcc] wrote a readme file
+ 1 file changed, 2 insertions(+)                # 1个文件修改, 插入了2行内容
+ create mode 100644 readme.txt
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ git diff readme.txt  # 查看更详细的修改
+diff --git a/readme.txt b/readme.txt
+index 46d49bf..9247db6 100644
+--- a/readme.txt
++++ b/readme.txt
+@@ -1,2 +1,2 @@                       # 修改了第1行
+-Git is a version control system.
++Git is a distributed version control system.
+ Git is free software.
+$ git add readme.txt 
+$ git status
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	修改：     readme.txt
+
+$ git commit -m 'add distributed'
+[master 6baa439] add distributed
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git status
+位于分支 master
+无文件要提交，干净的工作区
+
+# 版本回退,
+$ git log                                         # 查看commit记录
+commit 4700ef6a2a37794445bfac873abde19c95c0ef68
+Author: yangxl <873909698@qq.com>                 # 这个是之前配置的
+Date:   Sat Jul 13 11:27:31 2019 +0800
+
+    append GPL                                    # 最新
+
+commit 6baa439e3831396ec824afce344c026435b9dcce
+Author: yangxl <873909698@qq.com>
+Date:   Sat Jul 13 11:24:56 2019 +0800
+
+    add distributed
+
+commit 2243fccf682dfd5711d4e80b06e8d5e9fa188a28
+Author: yangxl <873909698@qq.com>
+Date:   Sat Jul 13 11:13:06 2019 +0800
+
+    wrote a readme file
+$ git log --pretty=oneline                                     # 简洁版日志
+4700ef6a2a37794445bfac873abde19c95c0ef68 append GPL
+6baa439e3831396ec824afce344c026435b9dcce add distributed
+2243fccf682dfd5711d4e80b06e8d5e9fa188a28 wrote a readme file
+$ git reset --hard HEAD^
+HEAD 现在位于 6baa439 add distributed
+$ git log --pretty=oneline                                   # 回退一个版本后, commit日志也少了一个
+6baa439e3831396ec824afce344c026435b9dcce add distributed
+2243fccf682dfd5711d4e80b06e8d5e9fa188a28 wrote a readme file
+$ git reset --hard 4700ef           # commit id, 前进到最新commit, 因为回退后比这更新commit看不到了(git log查不到), 所以当没关闭窗口之前可以这么操作
+HEAD 现在位于 4700ef6 append GPL
+$ git reflog                                 # 查看每次的提交记录
+6baa439 HEAD@{0}: reset: moving to HEAD^
+4700ef6 HEAD@{1}: reset: moving to 4700ef
+6baa439 HEAD@{2}: reset: moving to HEAD^
+4700ef6 HEAD@{3}: commit: append GPL                    # 这个是最新的
+6baa439 HEAD@{4}: commit: add distributed
+2243fcc HEAD@{5}: commit (initial): wrote a readme file
+
+在Git中，用HEAD表示当前版本，上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
+
+工作区和暂存区,
+
+版本库（Repository）,
+工作区有一个隐藏目录.git，这个不算工作区，而是Git的版本库。
+Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支master，以及指向master的一个指针叫HEAD。
+前面讲了我们把文件往Git版本库里添加的时候，是分两步执行的：
+第一步是用git add把文件添加进去，实际上就是把文件修改添加到暂存区；
+第二步是用git commit提交更改，实际上就是把暂存区的所有内容提交到当前分支。
+因为我们创建Git版本库时，Git自动为我们创建了唯一一个master分支，所以，现在，git commit就是往master分支上提交更改。你可以简单理解为，需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改。
+git commit之后，工作区、暂存区都是干净的。
+
+管理修改,
+yangxl@yangxl-virtual-machine:~/learngit$ vim readme.txt       # 修改
+yangxl@yangxl-virtual-machine:~/learngit$ git add readme.txt 
+yangxl@yangxl-virtual-machine:~/learngit$ git status
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	修改：     readme.txt
+
+yangxl@yangxl-virtual-machine:~/learngit$ vim readme.txt       # 再修改
+yangxl@yangxl-virtual-machine:~/learngit$ git status
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	修改：     readme.txt
+
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+yangxl@yangxl-virtual-machine:~/learngit$ git commit -m 'git tracks changes'  # 第1次修改添加到暂存区, 第2次修改还在工作区, 所以commit的只有第1次修改
+[master 76ca493] git tracks changes
+ 1 file changed, 1 insertion(+)
+yangxl@yangxl-virtual-machine:~/learngit$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+yangxl@yangxl-virtual-machine:~/learngit$ git diff HEAD -- readme.txt  # 查看工作区和版本库里面最新版本的区别
+diff --git a/readme.txt b/readme.txt
+index 76d770f..a9c5755 100644
+--- a/readme.txt
++++ b/readme.txt
+@@ -1,4 +1,4 @@
+ Git is a distributed version control system.
+ Git is free software distributed under the GPL.
+ Git has a mutable index called stage.
+-Git tracks changes.
++Git tracks changes of files.
+
+撤销修改,
+命令git checkout -- readme.txt意思就是，把readme.txt文件在<<工作区>>的修改全部撤销，这里有两种情况：
+一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+总之，就是让这个文件回到最近一次git commit或git add时的状态。
+# 第1中情况,
+$ vim readme.txt
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git checkout -- readme.txt    # 第一种情况, '--'不能忘
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 master
+无文件要提交，干净的工作区
+***********
+# 第2种情况,
+$ vim readme.txt 
+$ git add readme.txt 
+$ git status
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	修改：     readme.txt
+
+$ git reset HEAD readme.txt          # 重置到最新版本, 取消暂存的变更放回工作区
+重置后取消暂存的变更：
+M	readme.txt
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ git checkout -- readme.txt
+$ git status
+位于分支 master
+无文件要提交，干净的工作区
+*****
+第3种情况,
+现在，假设你不但改错了东西，还从暂存区提交到了版本库，怎么办呢？可以回退到上一个版本。不过，这是有条件的，就是你还没有把自己的本地版本库推送到远程。一旦你把“stupid boss”提交推送到远程版本库，你就真的惨了……
+
+小结:
+场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
+场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令git reset HEAD file，就回到了场景1，第二步按场景1操作。
+场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+
+删除文件,
+
+
+*********************
+删除操作
+$ rm test.txt   # 本地删除了
+
+# 1. 修改在工作区
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add/rm <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	删除：     test.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ ls
+LICENSE  readme.txt
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git checkout -- test.txt
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ ls
+LICENSE  readme.txt  test.txt
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 master
+无文件要提交，干净的工作区
+
+# 2. 已放到暂存区
+$ rm test.txt 
+$ git add test.txt 
+$ git status
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	删除：     test.txt
+
+$ ls
+LICENSE  readme.txt
+$ git checkout -- test.txt  # 无效
+error: pathspec 'test.txt' did not match any file(s) known to git.
+$ git reset HEAD test.txt
+重置后取消暂存的变更：
+D	test.txt
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add/rm <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	删除：     test.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ git checkout -- test.txt  # 重复第一步
+$ git status
+位于分支 master
+无文件要提交，干净的工作区
+$ ls
+LICENSE  readme.txt  test.txt
+
+# 3.修改已提交到版本库
+$ rm test.txt 
+$ git add test.txt 
+$ git commit -m 'delete test.txt'
+[master aa26b40] delete test.txt
+ 1 file changed, 2 deletions(-)
+ delete mode 100644 test.txt
+$ git status 
+位于分支 master
+无文件要提交，干净的工作区
+t$ ls
+LICENSE  readme.txt
+$ git log --pretty=oneline
+aa26b40d5864baa8928a2d3c67606ebdec9f383e delete test.txt
+7d277974f6fc0fd49d7e65679fb974a1157c86c6 add test.txt
+1563afe8985cadcf4e8cb9c748c76d21049cde5f aa
+a13c4acb7c6f65d6cabeb528cff8e106d442f4a1 git tracks changes
+43a090fe4e0fa365a11b9196b071d14adf2ce836 understand how stage works
+121d0bed47fc7d4762cc784d97ecc40c40c3eae6 append GPL
+12a12e2c9b1890b6225be2452f977a42f063f03d add distributed
+028dc65f3922ac30c228fa12d341d7a749c687d2 wrote a readme file
+$ git reset 7d277974f6fc0fd49d7e65679fb974a1157c86c6  # 把修改从版本库直接撤销到工作区
+重置后取消暂存的变更：
+D	test.txt
+$ ls
+LICENSE  readme.txt
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add/rm <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	删除：     test.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ git checkout -- test.txt
+$ git status
+位于分支 master
+无文件要提交，干净的工作区
+$ ls
+LICENSE  readme.txt  test.txt
+
+
+##  真的删除文件
+$ rm test.txt 
+$ git status
+位于分支 master
+尚未暂存以备提交的变更：
+  （使用 "git add/rm <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	删除：     test.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ git rm test.txt 
+rm 'test.txt'
+$ git status 
+位于分支 master
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	删除：     test.txt
+
+$ git commit -m 'remove test.txt'
+[master 0cda12c] remove test.txt
+ 1 file changed, 2 deletions(-)
+ delete mode 100644 test.txt
+$ git status
+位于分支 master
+无文件要提交，干净的工作区
+
+小结:
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+命令git rm用于删除一个文件。如果一个文件已经被提交到版本库，那么你永远不用担心误删，但是要小心，你只能恢复文件到最新版本，你会丢失最近一次提交后你修改的内容。
+
+
+******************************
+远程仓库,
+ssh-keygen -t rsa -C '873909698@qq.com'
+
+添加远程库,
+# 在github上创建了一个远程仓库后，有三种选择:
+	*****
+	…or create a new repository on the command line
+	echo "# learngit" >> README.md
+	git init
+	git add README.md
+	git commit -m "first commit"
+	git remote add origin https://github.com/yangxiaoling/learngit.git
+	git push -u origin master
+
+	…or push an existing repository from the command line
+	git remote add origin https://github.com/yangxiaoling/learngit.git
+	git push -u origin master
+
+	…or import code from another repository
+	You can initialize this repository with code from a Subversion, Mercurial, or TFS project.
+	*****
+
+# 本地代码推送到远程
+$ git remote add origin git@github.com:yangxiaoling/learngit.git
+$ git push -u origin master                                                   # 创建并关联新分支master
+The authenticity of host 'github.com (13.229.188.59)' can't be established.
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'github.com,13.229.188.59' (RSA) to the list of known hosts.
+对象计数中: 23, 完成.
+压缩对象中: 100% (18/18), 完成.
+写入对象中: 100% (23/23), 1.83 KiB | 0 bytes/s, 完成.
+Total 23 (delta 6), reused 0 (delta 0)
+remote: Resolving deltas: 100% (6/6), done.
+To git@github.com:yangxiaoling/learngit.git
+ * [new branch]      master -> master
+分支 master 设置为跟踪来自 origin 的远程分支 master。
+
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送到远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+
+从现在起，只要本地作了提交，就可以通过以下命令, 就能把本地master分支的最新修改推送至GitHub
+$ git push origin master
+
+克隆远程库,
+$ git clone git@github.com:michaelliao/gitskills.git
+
+
+分支管理,
+# 创建新分支进行开发，合并到主分支，删除开发分支
+$ git checkout -b dev    # -b参数表示创建并切换, 相当于(git branch dev; git checkout dev;)
+切换到一个新分支 'dev'
+$ git branch
+* dev
+  master
+$ vim readme.txt 
+$ git add readme.txt 
+$ git commit -m 'branch test'
+[dev 9050f1b] branch test
+ 1 file changed, 2 insertions(+)
+$ git checkout master 
+切换到分支 'master'
+您的分支与上游分支 'origin/master' 一致。
+$ cat readme.txt 
+$ git merge dev
+更新 0cda12c..9050f1b
+Fast-forward                 # 快进模式
+ readme.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+$ git status 
+位于分支 master
+您的分支领先 'origin/master' 共 1 个提交。
+  （使用 "git push" 来发布您的本地提交）
+无文件要提交，干净的工作区
+$ git branch -d dev 
+已删除分支 dev（曾为 9050f1b）。
+$ git branch 
+* master
+
+解决冲突,
+$ git checkout -b feature1
+切换到一个新分支 'feature1'
+$ vim readme.txt 
+$ git add readme.txt 
+$ git commit -m 'and simple'
+[feature1 0077aa5] and simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git checkout master 
+切换到分支 'master'
+您的分支领先 'origin/master' 共 1 个提交。
+  （使用 "git push" 来发布您的本地提交）
+$ vim readme.txt 
+$ git add readme.txt 
+$ git commit -m '& simple'
+[master ff0d113] & simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git merge feature1   # 出现冲突
+自动合并 readme.txt
+冲突（内容）：合并冲突于 readme.txt
+自动合并失败，修正冲突然后提交修正的结果。
+$ git status
+位于分支 master
+您的分支领先 'origin/master' 共 2 个提交。
+  （使用 "git push" 来发布您的本地提交）
+您有尚未合并的路径。
+  （解决冲突并运行 "git commit"）
+
+未合并的路径：
+  （使用 "git add <文件>..." 标记解决方案）
+
+	双方修改：   readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ cat readme.txt  # 可以直接查看冲突内容
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+<<<<<<< HEAD
+Creating a new branch is quick & simple.
+=======
+Creating a new branch is quick and simple.
+>>>>>>> feature1
+$ vim readme.txt  # 手动处理冲突
+$ git add readme.txt 
+$ git commit -m 'conflict fixed'
+[master c6cc477] conflict fixed
+$ git log --graph --pretty=oneline --abbrev-commit  # 查看合并状态
+*   be9a52d conflict fixed
+|\  
+| * 13d2aa0 AND simple
+* | bee4c6c & simple
+|/  
+* 8d32287 branch test
+* 32dfe2d remove test.txt
+* 12aae34 add test.txt
+* 89c3c58 of files
+* 76ca493 git tracks changes
+* fda043e understand how stage works
+* 4700ef6 append GPL
+* 6baa439 add distributed
+* 2243fcc wrote a readme file
+$ git branch -d feature1 
+已删除分支 feature1（曾为 0077aa5）。
+
+分支管理策略,
+通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+$ git checkout -b dev
+切换到一个新分支 'dev'
+$ vim readme.txt 
+$ git add readme.txt 
+$ git commit -m 'add merge'
+[dev 403bb43] add merge
+ 1 file changed, 1 insertion(+)
+$ git checkout master 
+切换到分支 'master'
+您的分支领先 'origin/master' 共 4 个提交。
+  （使用 "git push" 来发布您的本地提交）
+$ git merge --no-ff -m 'merge with no-ff' dev   # 强制禁用fast-forward
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+$ git log --graph --pretty=oneline --abbrev-commit 
+*   6511234 merge with no-ff
+|\  
+| * 403bb43 add merge      # 保留的分支信息
+|/  
+*   c6cc477 conflict fixed
+
+
+bug分支,
+每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除。
+当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，但是，等等，当前正在dev上进行的工作还没有提交：
+$ git checkout -b dev
+切换到一个新分支 'dev'
+$ vim fm947
+$ git status
+位于分支 dev
+未跟踪的文件:
+  （使用 "git add <文件>..." 以包含要提交的内容）
+
+	fm947
+
+提交为空，但是存在尚未跟踪的文件（使用 "git add" 建立跟踪）
+$ git stash           # 因为只是创建了一个文件fm947, 但未与git建立联系所以检测不到
+没有要保存的本地修改
+$ git status
+位于分支 dev
+未跟踪的文件:
+  （使用 "git add <文件>..." 以包含要提交的内容）
+
+	fm947
+
+提交为空，但是存在尚未跟踪的文件（使用 "git add" 建立跟踪）
+$ git add fm947
+$ git stash
+Saved working directory and index state WIP on dev: 1aead76 merge with no-ff
+HEAD 现在位于 1aead76 merge with no-ff
+$ git stash list
+stash@{0}: WIP on dev: 1aead76 merge with no-ff
+# 开始修复master上的bug,
+$ git checkout master 
+切换到分支 'master'
+您的分支领先 'origin/master' 共 6 个提交。
+  （使用 "git push" 来发布您的本地提交）  
+$ git checkout -b issue-101
+切换到一个新分支 'issue-101'
+$ vim readme.txt 
+$ git add readme.txt 
+$ git commit -m 'fix bug 101'
+[issue-101 7c5ca4f] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git checkout master 
+切换到分支 'master'
+您的分支领先 'origin/master' 共 6 个提交。
+  （使用 "git push" 来发布您的本地提交）
+$ git merge --no-ff -m 'merge bug fix 101' issue-101 
+Merge made by the 'recursive' strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git branch 
+  dev
+  issue-101
+* master
+# bug修复完成,
+$ git checkout dev
+切换到分支 'dev'
+$ git stash list
+stash@{0}: WIP on dev: 1aead76 merge with no-ff
+$ git stash apply stash@{0} 
+位于分支 dev
+要提交的变更：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+
+	新文件：   fm947
+
+$ git stash drop  # 或, git stash pop，恢复的同时把stash内容也删了
+
+强力删除(还未合并的)分支,
+$ git checkout -b feature-vulcan
+切换到一个新分支 'feature-vulcan'
+$ vim vulcan.py
+$ git add vulcan.py 
+$ git commit -m 'add feature vulcan'
+[feature-vulcan 7e459d1] add feature vulcan
+ 1 file changed, 2 insertions(+)
+ create mode 100644 vulcan.py
+$ git checkout dev 
+切换到分支 'dev'
+$ git branch -d feature-vulcan 
+error: 分支 'feature-vulcan' 没有完全合并。
+如果您确认要删除它，执行 'git branch -D feature-vulcan'。
+$ git branch -D feature-vulcan     # 强制删除没有被合并的分支
+已删除分支 feature-vulcan（曾为 7e459d1）。
+
+多人协作,
+当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+要查看远程库的信息，用git remote：
+$ git remote
+origin
+或者，用git remote -v显示更详细的信息：
+$ git remote -v
+origin	https://github.com/yangxiaoling/learngit.git (fetch)
+origin	https://github.com/yangxiaoling/learngit.git (push)
+上面显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。
+
+推送分支,
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+$ git push origin master 
+Username for 'https://github.com': yangxiaoling
+Password for 'https://yangxiaoling@github.com': 
+对象计数中: 20, 完成.
+Delta compression using up to 2 threads.
+压缩对象中: 100% (20/20), 完成.
+写入对象中: 100% (20/20), 1.73 KiB | 0 bytes/s, 完成.
+Total 20 (delta 9), reused 0 (delta 0)
+remote: Resolving deltas: 100% (9/9), completed with 1 local object.
+To https://github.com/yangxiaoling/learngit.git
+   0cda12c..185abbf  master -> master
+但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+    master分支是主分支，因此要时刻与远程同步；
+    dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+    bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+    feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+总之，就是在Git中，分支完全可以在本地自己藏着玩，是否推送，视你的心情而定！
+
+抓取分支,
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+当你的小伙伴从远程库clone时，默认情况下，你的小伙伴只能看到本地的master分支。
+现在，你的小伙伴要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：
+luke@luke-virtual-machine:~/learngit$ git checkout -b dev origin/dev 
+分支 dev 设置为跟踪来自 origin 的远程分支 dev。
+切换到一个新分支 'dev'
+# 小伙伴推送代码,
+luke@luke-virtual-machine:~/learngit$ vim env.txt
+luke@luke-virtual-machine:~/learngit$ git add env.txt 
+luke@luke-virtual-machine:~/learngit$ git commit -m 'add env'
+[dev 66e5faf] add env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+luke@luke-virtual-machine:~/learngit$ git push origin dev 
+对象计数中: 3, 完成.
+Delta compression using up to 4 threads.
+压缩对象中: 100% (2/2), 完成.
+写入对象中: 100% (3/3), 300 bytes | 0 bytes/s, 完成.
+Total 3 (delta 0), reused 0 (delta 0)
+To git@github.com:yangxiaoling/learngit.git
+   1aead76..66e5faf  dev -> dev
+
+# 你推送代码,
+$ git branch 
+* dev
+  issue-101
+  master
+$ vim env.txt
+$ git add env.txt 
+$ git commit -m 'add new_env'
+[dev 516ab48] add new_env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+Warning: Permanently added the RSA host key for IP address '52.74.223.119' to the list of known hosts.
+To git@github.com:yangxiaoling/learngit.git
+ ! [rejected]        dev -> dev (fetch first)
+error: 无法推送一些引用到 'git@github.com:yangxiaoling/learngit.git'
+提示：更新被拒绝，因为远程仓库包含您本地尚不存在的提交。这通常是因为另外
+提示：一个仓库已向该引用进行了推送。再次推送前，您可能需要先整合远程变更
+提示：（如 'git pull ...'）。
+提示：详见 'git push --help' 中的 'Note about fast-forwards' 小节。
+$ git pull
+自动合并 env.txt
+冲突（添加/添加）：合并冲突于 env.txt
+自动合并失败，修正冲突然后提交修正的结果。
+yangxl@yangxl-virtual-machine:~/learngit$ vim env.txt  # 手动解决冲突
+yangxl@yangxl-virtual-machine:~/learngit$ git status
+位于分支 dev
+您的分支和 'origin/dev' 出现了偏离，
+并且分别有 1 和 1 处不同的提交。
+  （使用 "git pull" 来合并远程分支）
+您有尚未合并的路径。
+  （解决冲突并运行 "git commit"）
+
+未合并的路径：
+  （使用 "git add <文件>..." 标记解决方案）
+
+	双方添加：   env.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+$ git add env.txt 
+$ git commit -m 'remove conflict'
+[dev d1f89a8] remove conflict
+$ git push origin dev 
+对象计数中: 6, 完成.
+压缩对象中: 100% (4/4), 完成.
+写入对象中: 100% (6/6), 615 bytes | 0 bytes/s, 完成.
+Total 6 (delta 0), reused 0 (delta 0)
+To git@github.com:yangxiaoling/learngit.git
+   66e5faf..d1f89a8  dev -> dev
+
+
+#一些失误
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 master
+您的分支与上游分支 'origin/master' 一致。
+无文件要提交，干净的工作区
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ vim hello.py
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git add hello.py 
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git commit -m 'add coding: utf-8'
+[master 1f5eef5] add coding: utf-8
+ 1 file changed, 1 insertion(+)
+ create mode 100644 hello.py
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git push origin dev
+Username for 'https://github.com': yangxiaoling
+Password for 'https://yangxiaoling@github.com': 
+To https://github.com/yangxiaoling/learngit.git
+ ! [rejected]        dev -> dev (fetch first)
+error: 无法推送一些引用到 'https://github.com/yangxiaoling/learngit.git'        # yangxl向dev分支提交了代码
+提示：更新被拒绝，因为远程仓库包含您本地尚不存在的提交。这通常是因为另外
+提示：一个仓库已向该引用进行了推送。再次推送前，您可能需要先整合远程变更
+提示：（如 'git pull ...'）。
+提示：详见 'git push --help' 中的 'Note about fast-forwards' 小节。
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git pull
+remote: Counting objects: 3, done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 1), reused 3 (delta 1), pack-reused 0
+展开对象中: 100% (3/3), 完成.
+来自 https://github.com/yangxiaoling/learngit
+ * [新分支]          dev        -> origin/dev
+Already up-to-date.
+
+******解决失误******
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git push origin dev    # 走到这里发现错了，是对同一个文件进行操作，所有先删除hello.py
+Username for 'https://github.com': exit
+Password for 'https://exit@github.com': 
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/yangxiaoling/learngit.git/'
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git log --pretty=oneline
+1f5eef56721597f7e5a317649aef910d5bfc7433 add coding: utf-8
+185abbffc56bbd4c6d8d2e332475424690546d9f merged bug fix 101
+...
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git reset 185abbffc56bbd4c6d8d2e332475424690546d9f
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 master
+您的分支与上游分支 'origin/master' 一致。
+未跟踪的文件:
+  （使用 "git add <文件>..." 以包含要提交的内容）
+
+	hello.py
+
+提交为空，但是存在尚未跟踪的文件（使用 "git add" 建立跟踪）
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git log --pretty=oneline
+185abbffc56bbd4c6d8d2e332475424690546d9f merged bug fix 101
+...
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git checkout  -- hello.py       # 无效，工作区的文件...
+error: pathspec 'hello.py' did not match any file(s) known to git.
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ rm hello.py  # 直接删除
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status 
+位于分支 master
+您的分支与上游分支 'origin/master' 一致。
+无文件要提交，干净的工作区
+******失误处理结束*****
+
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git checkout dev 
+切换到分支 'dev'
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ vim readme.txt     # 对同一个文件进行操作
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git add readme.txt 
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git commit -m 'add words'
+[dev 1079bb2] add words
+ 1 file changed, 1 insertion(+)
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git push origin dev   # 失败，已经落后于远程分支
+Username for 'https://github.com': yangxiaoling
+Password for 'https://yangxiaoling@github.com': 
+To https://github.com/yangxiaoling/learngit.git
+ ! [rejected]        dev -> dev (non-fast-forward)
+error: 无法推送一些引用到 'https://github.com/yangxiaoling/learngit.git'
+提示：更新被拒绝，因为您当前分支的最新提交落后于其对应的远程分支。
+提示：再次推送前，先与远程变更合并（如 'git pull ...'）。详见
+提示：'git push --help' 中的 'Note about fast-forwards' 小节。
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git pull 
+当前分支没有跟踪信息。
+请指定您要合并哪一个分支。
+详见 git-pull(1)。
+
+    git pull <remote> <branch>
+
+如果您想要为此分支创建跟踪信息，您可以执行：
+
+    git branch --set-upstream-to=origin/<branch> dev
+
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git branch --set-upstream-to=origin/dev dev 
+分支 dev 设置为跟踪来自 origin 的远程分支 dev。
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git pull  # 失败，因为本地dev有修改
+自动合并 readme.txt
+冲突（内容）：合并冲突于 readme.txt
+自动合并失败，修正冲突然后提交修正的结果。
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ cat readme.txt 
+Git is a distributed version control system.
+Git is a free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+Creating a new branch is quick and simple.
+noff
+<<<<<<< HEAD
+kaiqigu_ubuntu
+=======
+/usr/bin/env
+>>>>>>> f2940b2fdc3b5c2c8f89105c84dfa596b025d28c
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ vim readme.txt 
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git push origin dev   # 手动处理冲突也不行，因为修改已经在分支中，现在处理冲突相当于二次修改。只能撤销并stash，然后抓取，最后处理冲突。
+Username for 'https://github.com': yangxiaoling
+Password for 'https://yangxiaoling@github.com': 
+To https://github.com/yangxiaoling/learngit.git
+ ! [rejected]        dev -> dev (non-fast-forward)
+error: 无法推送一些引用到 'https://github.com/yangxiaoling/learngit.git'
+提示：更新被拒绝，因为您当前分支的最新提交落后于其对应的远程分支。
+提示：再次推送前，先与远程变更合并（如 'git pull ...'）。详见
+提示：'git push --help' 中的 'Note about fast-forwards' 小节。
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git pull
+error: Pull is not possible because you have unmerged files.
+提示：请在工作区改正文件，然后酌情使用 'git add/rm <文件>' 命令标记
+提示：解决方案并提交。
+fatal: Exiting because of an unresolved conflict.
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git log --pretty=oneline
+1079bb2504b98e22566e1bb65c945bbb22e22117 add words
+403bb43507264b9fa4329695ba840670c3969379 add merge
+...
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git reset 403bb43507264b9fa4329695ba840670c3969379
+重置后取消暂存的变更：
+M	readme.txt
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 dev
+您的分支落后 'origin/dev' 共 4 个提交，并且可以快进。
+  （使用 "git pull" 来更新您的本地分支）
+尚未暂存以备提交的变更：
+  （使用 "git add <文件>..." 更新要提交的内容）
+  （使用 "git checkout -- <文件>..." 丢弃工作区的改动）
+
+	修改：     readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git pull    # 因为本地dev已经发生修改
+更新 403bb43..f2940b2
+error: Your local changes to the following files would be overwritten by merge:
+	readme.txt
+Please, commit your changes or stash them before you can merge.
+Aborting
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git stash   # stash上场了
+Saved working directory and index state WIP on dev: 403bb43 add merge
+HEAD 现在位于 403bb43 add merge
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 dev
+您的分支落后 'origin/dev' 共 4 个提交，并且可以快进。
+  （使用 "git pull" 来更新您的本地分支）
+无文件要提交，干净的工作区
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git pull
+更新 403bb43..f2940b2
+Fast-forward
+ readme.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git stash list
+stash@{0}: WIP on dev: 403bb43 add merge
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git stash pop
+自动合并 readme.txt
+冲突（内容）：合并冲突于 readme.txt
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git status
+位于分支 dev
+您的分支与上游分支 'origin/dev' 一致。
+未合并的路径：
+  （使用 "git reset HEAD <文件>..." 以取消暂存）
+  （使用 "git add <文件>..." 标记解决方案）
+
+	双方修改：   readme.txt
+
+修改尚未加入提交（使用 "git add" 和/或 "git commit -a"）
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ cat readme.txt 
+Git is a distributed version control system.
+Git is a free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+Creating a new branch is quick and simple.
+noff
+<<<<<<< Updated upstream
+/usr/bin/env
+=======
+kaiqigu_ubuntu
+>>>>>>> Stashed changes
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ vim readme.txt   # 这才是真正手动解决冲突
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git add readme.txt 
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git commit -m 'merge & conflict'
+[dev d2cd592] merge & conflict
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ git push origin dev 
+Username for 'https://github.com': yangxiaoling
+Password for 'https://yangxiaoling@github.com': 
+对象计数中: 3, 完成.
+Delta compression using up to 2 threads.
+压缩对象中: 100% (3/3), 完成.
+写入对象中: 100% (3/3), 321 bytes | 0 bytes/s, 完成.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/yangxiaoling/learngit.git
+   f2940b2..d2cd592  dev -> dev
+
+
+
+标签管理
+创建标签
+$ git checkout master 
+$ git tag master001
+$ git tag  # 查看所有标签：
+master001
+
+默认标签是打在最新提交的commit上的。有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？
+方法是找到历史提交的commit id，然后打上就可以了：
+$ git log --pretty=oneline --abbrev-commit 
+185abbf merged bug fix 101
+1fdd0b5 fix bug 101
+6511234 merge with no-ff
+403bb43 add merge
+c6cc477 conflict fixed
+$ git tag master000 403bb43  # 403bb43 add merge
+$ git tag
+master000
+master001
+
+注意，标签不是按时间顺序列出，而是按字母排序的。可以用git show <tagname>查看标签信息：
+$ git show master000
+还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
+$ git tag -a master-001 -m 'version -001 release' 7d27797
+
+标签总是和某个commit挂钩。如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签。
+
+操作标签,
+因为创建的标签都只存储在本地，不会自动推送到远程。所以，打错的标签可以在本地安全删除。
+$ git tag
+master-001
+master000
+master001
+$ git push origin master000  # 推送某个标签到远程
+$ git push origin --tags  # 或者，一次性推送全部尚未推送到远程的本地标签
+
+删除本地tag
+$ git tag -d master-001 
+已删除标签 'master-001'（曾为 43b1d50）
+删除远程tag分两步:
+$ git tag -d master000  # 第一步删除本地tag
+$ git push origin :refs/tags/master000  # 第二步删除远程tag
+
+
+使用GitHub,
+如何参与一个开源项目呢？点“Fork”就在自己的账号下克隆了一个仓库，然后，从自己的账号下clone：
+$ git clone git@github.com:yangxiaoling/bootstrap.git
+一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。
+如果你想修复bootstrap的一个bug，或者新增一个功能，立刻就可以开始干活，干完后，往自己的仓库推送。
+如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request。当然，对方是否接受你的pull request就不一定了。
+小结:
+    在GitHub上，可以任意Fork开源仓库；
+    自己拥有Fork后的仓库的读写权限；
+    可以推送pull request给官方仓库来贡献代码。
+
+上色,
+$ git config --global color.ui true
+
+忽略特殊文件
+在Git工作区的根目录下创建一个特殊的.gitignore文件，然后把要忽略的文件名填进去，Git就会自动忽略这些文件。
+不需要从头写.gitignore文件，GitHub已经为我们准备了各种配置文件，只需要组合一下就可以使用了。所有配置文件可以直接在线浏览：https://github.com/github/gitignore
+忽略文件的原则是：
+    忽略操作系统自动生成的文件，比如缩略图等；
+    忽略编译生成的中间文件、可执行文件等，也就是如果一个文件是通过另一个文件自动生成的，那自动生成的文件就没必要放进版本库，比如Java编译产生的.class文件；
+    忽略你自己的带有敏感信息的配置文件，比如存放口令的配置文件。
+最后一步就是把.gitignore也提交到Git，就完成了！
+
+有些时候，你想添加一个文件到Git，但发现添加不了，原因是这个文件被.gitignore忽略了：
+$ git add App.class
+
+如果你确实想添加该文件，可以用-f强制添加到Git：
+$ git add -f App.class
+或者你发现，可能是.gitignore写得有问题，需要找出来到底哪个规则写错了，可以用git check-ignore命令检查：
+$ git check-ignore -v App.class
+.gitignore:3:*.class    App.class
+
+
+配置别名
+告诉Git，以后st就表示status：
+$ git config --global alias.st status
+--global参数是全局参数，也就是这些命令在这台电脑的所有Git仓库下都有用。
+$ git config --global alias.unstage 'reset HEAD'  # 别名表示多个words
+
+
+搭建git服务器
+第一步，安装git：
+$ sudo apt-get install git
+第二步，创建一个git用户，用来运行git服务：
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/learngit$ sudo adduser git
+正在添加用户"git"...
+正在添加新组"git" (1001)...
+正在添加新用户"git" (1001) 到组"git"...
+创建主目录"/home/git"...
+正在从"/etc/skel"复制文件...
+输入新的 UNIX 密码：             # kaiqigu1
+重新输入新的 UNIX 密码： 
+passwd：已成功更新密码
+正在改变 git 的用户信息
+请输入新值，或直接敲回车键以使用默认值
+	全名 []: 
+	房间号码 []: 
+	工作电话 []: 
+	家庭电话 []: 
+	其它 []: 
+这些信息是否正确？ [Y/n] y
+第三步，创建证书登录：
+收集所有需要登录的用户的公钥，把所有公钥导入到/home/git/.ssh/authorized_keys文件里，一行一个。
+第四步，初始化Git仓库：
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~$ mkdir gitserver
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~$ cd gitserver/
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/gitserver$ mkdir sample.git
+创建一个裸仓库，裸仓库没有工作区，因为服务器上的Git仓库纯粹是为了共享，所以不让用户直接登录到服务器上去改工作区，并且服务器上的Git仓库通常都以.git结尾。
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/gitserver$ sudo git init --bare sample.git    # 注意是在gitserver下执行的
+初始化空的 Git 仓库于 /home/dinghuangjing/gitserver/sample.git/
+把owner改为git：
+dinghuangjing@dinghuangjing-To-be-filled-by-O-E-M:~/gitserver$ sudo chown -R git:git sample.git
+第五步，禁用shell登录：
+出于安全考虑，第二步创建的git用户不允许登录shell，这可以通过编辑/etc/passwd文件完成。找到类似下面的一行：
+git:x:1001:1001:,,,:/home/git:/bin/bash
+改为：
+git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell
+这样，git用户可以正常通过ssh使用git，但无法登录shell，因为我们为git用户指定的git-shell每次一登录就自动退出。
+第六步，克隆远程仓库：
+yangxl@ubuntu-64:~$ mkdir gitclient
+yangxl@ubuntu-64:~$ cd gitclient/
+yangxl@ubuntu-64:~/gitclient$ git init
+初始化空的 Git 仓库于 /home/yangxl/gitclient/.git/
+yangxl@ubuntu-64:~/gitclient$ git clone git@192.168.2.152:/home/dinghuangjing/gitserver/sample.git
+正克隆到 'sample'...
+git@192.168.2.152's password:
+remote: 对象计数中: 3, 完成.
+remote: Total 3 (delta 0), reused 0 (delta 0)
+接收对象中: 100% (3/3), 完成.
+检查连接... 完成。
+yangxl@ubuntu-64:~/gitclient$ ls
+sample
+
+
+
+*******************************************************************
+如果您当前分支的上游分支和您当前分支名不匹配，为推送到远程的上游分支，使用
+
+    git push origin HEAD:dev
+
+为推送至远程同名分支，使用
+
+    git push origin yangxl
+
+
+****************************************************************
+所有stash在每个分支都能看到，所以放开的时候如果分支没对上，就会造成代码出错，解决方法就是在当前分支上重新stash，然后切换到正确的分支重新放开再stash。
+另外，最新的stash为stash@{0}。
+*****
+kaiqigudeiMac:backend kaiqigu$ git stash list    # 当前分支为release_bt，能看到所有分支上的stash
+stash@{0}: WIP on release: d93ddd2ac combine server
+stash@{1}: WIP on release_bt: 9c21b0bd1 delete gameserver
+
+kaiqigudeiMac:backend kaiqigu$ git stash pop stash@{0}   ## 这里放开错了
+On branch release_bt
+Your branch is up to date with 'origin/release_bt'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   lib/utils/__init__.py
+        modified:   logics/association.py
+        modified:   models/association.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped stash@{0} (02f0ebe4e46cc89174196351b9d324d239503b3b)
+
